@@ -215,3 +215,14 @@ void inOrder(TREE* node) {
     printf(" %d", node->value);
     inOrder(node->right);
 }
+
+void deleteTree(TREE** root){
+    if(*root == NULL) {
+        free(*root);
+        return;
+    }
+    deleteTree(&(*root)->left);
+    deleteTree(&(*root)->right);
+    free(*root);
+    *root = NULL;
+}

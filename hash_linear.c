@@ -24,7 +24,7 @@ void init(){
     }
 }
 
-struct DataItem *search(int key) {
+struct DataItem *search_hash_linear(int key) {
     //get the hash
     int hashIndex = hashCode(key);
 
@@ -88,6 +88,8 @@ void insert_Linear(int key, int data) {
     }
 }
 
+
+
 void display() {
     int i = 0;
 
@@ -102,16 +104,3 @@ void display() {
     printf("\n");
 }
 
-////test s casom
-//int main(){
-//    clock_t start_t, end_t;
-//    hashArray = (struct DataItem**) malloc(SIZE *sizeof(struct DataItem*));
-//    init();
-//    start_t = clock();
-//    for(int i = 0; i < 10000000; i++){
-//        insert_Linear(i,1);
-//    }
-//    end_t = clock();
-//    printf("HASHOVANIE LINEAR pridanie:  %20g\n", (double)(-start_t + end_t)/ CLOCKS_PER_SEC);
-//    return 0;
-//}

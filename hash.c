@@ -1,79 +1,131 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
 
 typedef struct cell{
-    int value;
+    int key;
     struct cell* next;
 }CELL;
 
-typedef struct tabulka{
-    int velkost;
+typedef struct Info{
+    CELL **table;
+    int size;
+    int number_of_elements;
 
-}TABULKA;
+}INFO;
+
+int hash(int number,int size);
+void create_new_table(INFO *info);
+void insert_hash(int number, INFO *info);
+void resize(INFO *info,int stara_vyska);
+void print_hash(INFO *info);
+void freeTable(INFO **table);
+int isPrime(int n);
+int nextPrime(int N);
+CELL* search_hash(INFO *info,int key);
+CELL* new_node_hash(int number);
 
 
-void insert_hash(int number, CELL **table, int size,int *number_of_elements) {
-    CELL *temp,*new,*pred;
-    *number_of_elements +=1;
-    int position_in_table = (number)%(size);
-    if(table[position_in_table]->value == number) return;
+int hash(int number, int size)
+{
+    return (number)%(size);
+
+}
+
+void create_new_table(INFO *info)
+{
+    CELL** new_table = (CELL**)malloc(info->size* sizeof(CELL*));
+    for (int i = 0; i < info->size; i++) {
+        new_table[i] = NULL;
+    }
+    info->table = new_table;
+}
+
+CELL* new_node_hash(int number) {
+    CELL *new;
+    new = (CELL *) malloc(sizeof(CELL));
+    new->key = number;
+    new->next = NULL;
+    return new;
+}
+
+
+void insert_hash(int number, INFO *info) {
+    CELL *temp;
+    int size = info->size;
+    info->number_of_elements +=1;
+    CELL **table = info->table;
+    int position_in_table = hash(number,size);
+    if(table[position_in_table]!=NULL && table[position_in_table]->key == number) return;
     if(table[position_in_table]==NULL) {
-        new = (CELL*)malloc(sizeof(CELL));
-        new->value = number;
-        new->next = NULL;
-        table[position_in_table] = new;
+        table[position_in_table] = new_node_hash(number);
     }
     else
     {
         temp = table[position_in_table];
         while(temp->next!=NULL) {
-            if(temp->value == number) return;
+            if(temp->key == number) return;
             temp = temp->next;
         }
-        new = (CELL*)malloc(sizeof(CELL));
-        new->value = number;
-        new->next = NULL;
-        temp->next = new;
+        temp->next = new_node_hash(number);
     }
-    //vypočí či treba resize
+    info->table = table;
 
 }
 
 
-CELL** resize(CELL **table,int size, int stara_vyska)
+void resize(INFO *info,int stara_vyska)
 {
-    TABULKA **tabulka;
-    tabulka = (TABULKA**)malloc(sizeof(TABULKA*));
-    CELL **new_table;
+
     CELL *vypis;
-    int number_of_elemets_r=0;
-    new_table=(CELL **)malloc(size *sizeof(CELL *));
-    for(int i=0;i<size;i++)
-    {
-        new_table[i]=NULL;
-    }
+    info->number_of_elements=0;
+    CELL **table = info->table;
+
+    create_new_table(info);
 
     for(int i=0;i<stara_vyska;i++)
     {
         if(table[i]!=NULL) {
             vypis = table[i];
-            if(table[i]->next==NULL) insert_hash(vypis->value,new_table,size,&number_of_elemets_r);
+            if(table[i]->next==NULL) insert_hash(vypis->key,info);
             else //chcem vypísať ten linked list
             {
                 while(vypis->next!=NULL){
-                    insert_hash(vypis->value,new_table,size,&number_of_elemets_r);
+                    insert_hash(vypis->key,info);
                     vypis = vypis->next;
                 }
-                insert_hash(vypis->value,new_table,size,&number_of_elemets_r);
+                insert_hash(vypis->key,info);
             }
         }
 
     }
-return new_table;
 }
 
+void print_hash(INFO *info)
+{
+    CELL *vypis;
+    for(int i=0;i<info->size;i++)
+    {
+        if(info->table[i]!=NULL) {
+            vypis = info->table[i];
+            if(info->table[i]->next==NULL) printf("%d",info->table[i]->key);
+            else //chcem vypísať ten linked list
+            {
+                while(vypis->next!=NULL){
+                    printf("%d", vypis->key);
+                    printf("->");
+                    vypis = vypis->next;
+                }
+                printf("%d", vypis->key);
+            }
+
+        }
+        else
+        {
+            printf("NULL");
+        }
+        printf("\n");
+    }
+
+
+}
 
 int isPrime(int n)
 {
@@ -91,9 +143,6 @@ int isPrime(int n)
 
     return 1;
 }
-
-// Function to return the smallest
-// prime number greater than N
 
 int nextPrime(int N)
 {
@@ -117,25 +166,40 @@ int nextPrime(int N)
     return prime;
 }
 
-CELL* search_hash(CELL** table,int key,int size) {
+CELL* search_hash(INFO *info,int key) {
 
-    CELL *vypis;
+    int size = info->size;
+    CELL *temp;
+    CELL **table = info->table;
     int position_in_table = (key) % (size);
-    if (table[position_in_table]->value == key) return table[position_in_table];
+    if (table[position_in_table]->key == key) return table[position_in_table];
     else {
-        vypis = table[position_in_table]->next;
+        temp = table[position_in_table]->next;
         {
-            while (vypis->next != NULL) {
-                if(vypis->value==key)
+            while (temp->next != NULL) {
+                if(temp->key==key)
                 {
-                    return vypis;
+                    return temp;
                 }
-                vypis = vypis->next;
-
+                temp = temp->next;
             }
-            return vypis;
+            return temp;
 
         }
-
     }
 }
+
+void freeTable(INFO **table) {                                                     //uvoľnenie tabuľky
+    CELL *temp, *next;
+    for (int i = 0; i < (*table)->size; i++) {
+        temp = (*table)->table[i];
+        while (temp != NULL) {
+            next = temp->next;
+            free(temp);
+            temp = next;
+        }
+    }
+    free(*table);
+    *table = NULL;
+}
+

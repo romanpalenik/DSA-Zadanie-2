@@ -54,9 +54,6 @@
  *					 number of BLACK nodes.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #define RED 0
 #define BLACK 1
 
@@ -501,3 +498,13 @@ void red_black_transplant(struct node *u, struct node *v){
 
     v->parent = u->parent;
 }
+//void delete_RB(TREE** root){
+//    if(*root == NULL) {
+//        free(*root);
+//        return;
+//    }
+//    deleteTree(&(*root)->left);
+//    deleteTree(&(*root)->right);
+//    free(*root);
+//    *root = NULL;
+//}
