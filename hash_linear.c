@@ -1,8 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
+//prevzaté z: https://www.tutorialspoint.com/data_structures_algorithms/hash_table_program_in_c.htm
 
 #define LOAD_LINEAR(N,M) (((double)(N) / (M) >= 0.75) ? 1:0)                            //pridané macro na výpocet pomeru medzi velkostou tabuľky
-#define SIZE_Hash 17                                                                         //a počtom pridaných prvkov
+#define SIZE_Hash 13                                                                         //a počtom pridaných prvkov
 
 struct DataItem {
     int data;
@@ -10,7 +9,6 @@ struct DataItem {
 };
 
 struct DataItem** hashArray = NULL;
-struct DataItem* item;
 int size = SIZE_Hash;
 int elements = 0;
 
@@ -24,7 +22,7 @@ void init(){
     }
 }
 
-struct DataItem *search_hash_linear(int key) {
+struct DataItem * search_hash_linear(int key) {
     //get the hash
     int hashIndex = hashCode(key);
 
@@ -44,18 +42,34 @@ struct DataItem *search_hash_linear(int key) {
     return NULL;
 }
 
-void insert_Linear();
+void insert_Linear(int key, int data);
+
+int notprimeNumber_linear(int number){                                                     //zistenie prvočísla
+    for(int i = 2; i < sqrt(number); i++){
+        if(number % i == 0){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int newSize_linear(int number){                                                              //zistenie novej veľkosti tabuľky (najbližšie 2-krát väčšie prvočíslo)
+    number = number * 2 + 1;
+    while(notprimeNumber_linear(number)){
+        number += 2;
+    }
+    return number;
+}
 
 void rehash(){
     int oldSize = size;
-    size *= 2;
+    size = newSize_linear(oldSize);
     struct DataItem** newArray = (struct DataItem**)malloc(size* sizeof(struct DataItem*));
     struct DataItem** oldArray = hashArray;
     hashArray = newArray;
     init();
     elements = 0;
-    for(int i = 0; i<oldSize;i++)
-    {
+    for(int i = 0; i<oldSize;i++){
         if(oldArray[i]!=NULL)
             insert_Linear(oldArray[i]->key,oldArray[i]->data);
     }
@@ -88,8 +102,6 @@ void insert_Linear(int key, int data) {
     }
 }
 
-
-
 void display() {
     int i = 0;
 
@@ -104,3 +116,13 @@ void display() {
     printf("\n");
 }
 
+void freeLinear(){
+    for(int i = 0; i < size; i++){
+        free(hashArray[i]);
+        hashArray[i] = NULL;
+    }
+    free(hashArray);
+    size = SIZE_Hash;
+    elements = 0;
+    hashArray = NULL;
+}

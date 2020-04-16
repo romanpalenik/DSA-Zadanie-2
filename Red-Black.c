@@ -57,6 +57,8 @@
 #define RED 0
 #define BLACK 1
 
+
+
 struct node{
     int key;
     int color;

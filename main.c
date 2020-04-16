@@ -1,914 +1,519 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <rpc.h>
+#include <math.h>
 #include "Red-Black.c"
 #include "hash.c"
 #include "avl.c"
 #include "hash_linear.c"
-#define SIZE 10000000
-#define KONIEC_TESTU      printf("%f\n", (double) (end.QuadPart - start.QuadPart) / frequency.QuadPart);
+#include "BVS.c"
+#define N1 0
+#define SIZE 10000
+#define SIZE_FACTOR 1.5
+#define KONIEC_TESTU       QueryPerformanceCounter(&end); printf("%f\n", (double) (end.QuadPart - start.QuadPart) / frequency.QuadPart);
 #define ZACIATOK_TESTU  QueryPerformanceFrequency(&frequency); QueryPerformanceCounter(&start);
 
-#define ERR_NO_NUM -1
-#define ERR_NO_MEM -2
 
 
 
-int myRandom(int size) {
 
-    srand(0);
-    int i, n;
-    static int numNums = 0;
-    static int *numArr = NULL;
+int* random_array() {
 
-    // Initialize with a specific size.
+    int len = 20000000 - N1 + 1, i, r, temp;
+    int *num= (int*)malloc(len* sizeof(int));
 
-    if (size >= 0) {
-        if (numArr != NULL)
-            free(numArr);
-        if ((numArr = malloc(sizeof(int) * size)) == NULL)
-            return ERR_NO_MEM;
-        for (i = 0; i < size; i++)
-            numArr[i] = i;
-        numNums = size;
+    //Fill array with desired numbers
+    for (temp = 0, i = N1; temp < len; i++, temp++)
+        num[temp] = i;
+
+    srand(0);  //seed rand()
+
+    //Fisher–Yates shuffle algorithm
+    for (i = len - 1; i > 0; i--) {
+        r = (rand() * rand())% i;   //pop random number
+        //swaping using temp
+        temp = num[i];
+        num[i] = num[r];
+        num[r] = temp;
     }
-
-    // Error if no numbers left in pool.
-
-    if (numNums == 0)
-        return ERR_NO_NUM;
-
-    // Get random number from pool and remove it (rnd in this
-    //   case returns a number between 0 and numNums-1 inclusive).
-
-    n = rand() *rand() % numNums;
-    i = numArr[n];
-    numArr[n] = numArr[numNums - 1];
-    numNums--;
-    if (numNums == 0) {
-        free(numArr);
-        numArr = 0;
-    }
-    return i;
-
+    return num;
 }
-int* random_array(int array[]) {
 
-    int i,pozicia=0;
-    i = myRandom(SIZE);
-    while (i >= 0) {
-        array[pozicia] = i;
-        pozicia++;
-        i = myRandom(-1);
+
+int *create_array_0_to_n(int n)
+{
+    int *array=(int*)malloc(n* sizeof(int));
+    for(int i=0;i<n;i++)
+    {
+        array[i] = i;
     }
     return array;
+
+}
+
+int *create_array_n_to_0(int n)
+{
+    int *array=(int*)malloc(n* sizeof(int));
+    for(int i=n-1;i>=0;i--)
+    {
+        array[i] = i;
+    }
+    return array;
+
+}
+
+int *create_array_aleternujuco(int n)
+{
+    int j=0;
+    int *array=(int*)malloc(n* sizeof(int));
+    for(int i=0;i<n/2;i++)
+    {
+
+        array[j] = i;
+        array[j+1] = n-i;
+        j = j+2 ;
+    }
+    return array;
+
 }
 
 
-void test1_insert();
-void test2_search();
-void test3_insert_search();
 
-void test1_insert_a();
-void test2_a_search();
-void test3_a_insert_search();
-
-
-void test1_random();
-void test2_random();
-void test3_random();
-
-
-
-void test1_insert()
+void insert_test_AVL(int *array)
 {
-    TREE *root = NULL;
     LARGE_INTEGER frequency;
     LARGE_INTEGER start;
     LARGE_INTEGER end;
 
-    ZACIATOK_TESTU
-
-        for (int i = 0; i < SIZE; i++)
-        {
-            root = insert(i, root);
-        }
-        
-    KONIEC_TESTU
-    deleteTree(&root);
-
-
-    ////red-black
-    NILL = malloc(sizeof(struct node));
-    NILL->color = BLACK;
-
-    ROOT = NILL;
-
-  ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE; i++) {
-        red_black_insert(i);
-    }
-    
-    KONIEC_TESTU
-
-
-//hash
-
-    INFO *info = (INFO*)malloc(sizeof(INFO));
-    info->size=13;
-    info->number_of_elements = 0;
-    create_new_table(info);
-    int old_size;
+    TREE *root = NULL;
 
     ZACIATOK_TESTU
 
     for (int i = 0; i < SIZE; i++)
     {
-        insert_hash(i,info);
-        if ((double )(info->number_of_elements) / (info->size) > 1.5)
-        {
-            old_size = info->size;
-            info->size = nextPrime(info->size * 2);
-            resize(info, old_size);
-        }
-    }
-
-    KONIEC_TESTU
-    freeTable(&info);
-
-
-//hash linear
-
-    hashArray = (struct DataItem**) malloc(SIZE_Hash *sizeof(struct DataItem*));
-    init();
-   
-    ZACIATOK_TESTU
-    
-    for(int i = 0; i < SIZE; i++){
-        insert_Linear(i,1);
-    }
-    
-    
-    KONIEC_TESTU
-
-}
-
-void test2_search()
-{
-    TREE *root = NULL;
-    LARGE_INTEGER frequency;
-    LARGE_INTEGER start;
-    LARGE_INTEGER end;
-
-    for (int i = 0; i < SIZE; i++)
-    {
-        root = insert(i, root);
-    }
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE; i++)
-    {
-        search_AVL(i,root);
-    }
-    
-
-
-    KONIEC_TESTU
-    deleteTree(&root);
-
-
-
-    ////red-black
-    NILL = malloc(sizeof(struct node));
-    NILL->color = BLACK;
-
-    ROOT = NILL;
-
-
-    for (int i = 0; i < SIZE; i++) {
-        red_black_insert(i);
-    }
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE; i++) {
-        tree_search(i);
-    }
-    
-
-    KONIEC_TESTU
-
-
-//hash
-
-    INFO *info = (INFO*)malloc(sizeof(INFO));
-    info->size=13;
-    info->number_of_elements = 0;
-    create_new_table(info);
-    int old_size;
-
-
-    for (int i = 0; i < SIZE; i++)
-    {
-        insert_hash(i,info);
-        if ((double )(info->number_of_elements) / (info->size) > 1.5)
-        {
-            old_size = info->size;
-            info->size = nextPrime(info->size * 2);
-            resize(info, old_size);
-        }
-    }
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE; i++) {
-        search_hash(info,i);
-    }
-
-    
-    freeTable(&info);
-    KONIEC_TESTU
-
-
-//hash linear
-    hashArray = (struct DataItem**) malloc(SIZE_Hash *sizeof(struct DataItem*));
-    init();
-
-    for(int i = 0; i < SIZE; i++){
-        insert_Linear(i,1);
-    }
-
-   ZACIATOK_TESTU
-
-    for(int i = 0; i < SIZE; i++){
-        search_hash_linear(i);
-    }
-
-    
-    
-    KONIEC_TESTU
-}
-
-void test3_insert_search()
-{
-    ///AVL
-    TREE *root = NULL;
-    LARGE_INTEGER frequency;
-    LARGE_INTEGER start;
-    LARGE_INTEGER end;
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE; i++)
-    {
-        root = insert(i, root);
-    }
-    for (int i = 0; i < SIZE; i++)
-    {
-        search_AVL(i,root);
-    }
-
-    
-    deleteTree(&root);
-    KONIEC_TESTU
-
-
-    /////red-black
-    NILL = malloc(sizeof(struct node));
-    NILL->color = BLACK;
-    ROOT = NILL;
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE; i++) {
-        red_black_insert(i);
-    }
-
-    for (int i = 0; i < SIZE; i++) {
-        tree_search(i);
-    }
-
-    
-    KONIEC_TESTU
-
-
-    ///chaining-hash
-
-    INFO *info = (INFO*)malloc(sizeof(INFO));
-    info->size=13;
-    info->number_of_elements = 0;
-    create_new_table(info);
-    int old_size;
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE; i++)
-    {
-        insert_hash(i,info);
-        if ((double )(info->number_of_elements) / (info->size) > 1.5)
-        {
-            old_size = info->size;
-            info->size = nextPrime(info->size * 2);
-            resize(info, old_size);
-        }
-    }
-    for (int i = 0; i < SIZE; i++) {
-        search_hash(info,i);
-    }
-
-    
-    freeTable(&info);
-    KONIEC_TESTU
-
-
-    ///hash linear
-
-    hashArray = (struct DataItem**) malloc(SIZE_Hash *sizeof(struct DataItem*));
-    init();
-
-   ZACIATOK_TESTU
-
-    for(int i = 0; i < SIZE; i++){
-        insert_Linear(i,1);
-    }
-    for(int i = 0; i < SIZE; i++){
-        search_hash_linear(i);
-    }
-
-    
-    
-    KONIEC_TESTU
-
-
-}
-
-void test1_insert_a()
-{
-    ///AVL
-    TREE *root = NULL;
-    LARGE_INTEGER frequency;
-    LARGE_INTEGER start;
-    LARGE_INTEGER end;
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE/2; i++) {
-        root = insert(i, root);
-        root = insert(SIZE-i,root);
-    }
-    
-    KONIEC_TESTU
-
-
-    /////red-black
-    NILL = malloc(sizeof(struct node));
-    NILL->color = BLACK;
-    ROOT = NILL;
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE/2; i++) {
-        red_black_insert(i);
-        red_black_insert(SIZE-i);
-    }
-
-    
-   KONIEC_TESTU
-
-
-    ///chain-hash
-    INFO *info = (INFO*)malloc(sizeof(INFO));
-    info->size=13;
-    info->number_of_elements = 0;
-    create_new_table(info);
-    int old_size;
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE/2; i++)
-    {
-        insert_hash(i,info);
-        if ((double )(info->number_of_elements) / (info->size) > 1.5)
-        {
-            old_size = info->size;
-            info->size = nextPrime(info->size * 2);
-            resize(info, old_size);
-        }
-        insert_hash(SIZE-i,info);
-        if ((double )(info->number_of_elements) / (info->size) > 1.5)
-        {
-            old_size = info->size;
-            info->size = nextPrime(info->size * 2);
-            resize(info, old_size);
-        }
-    }
-
-    
-    KONIEC_TESTU
-
-
-    ///linear hash
-
-    hashArray = (struct DataItem**) malloc(SIZE_Hash *sizeof(struct DataItem*));
-    init();
-   ZACIATOK_TESTU
-
-    for(int i = 0; i < SIZE; i++){
-        insert_Linear(i,1);
-        insert_Linear(SIZE-i,1);
-    }
-
-    
-    
-    KONIEC_TESTU
-}
-
-void test2_a_search()
-{
-    ///AVL
-    TREE *root = NULL;
-    LARGE_INTEGER frequency;
-    LARGE_INTEGER start;
-    LARGE_INTEGER end;
-
-    for (int i = 0; i < SIZE/2; i++) {
-        root = insert(i, root);
-        root = insert(SIZE-i,root);
-    }
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE/2; i++) {
-        search_AVL(i, root);
-        search_AVL(SIZE-i, root);
-    }
-
-    
-    KONIEC_TESTU
-
-
-    /////red-black
-    NILL = malloc(sizeof(struct node));
-    NILL->color = BLACK;
-    ROOT = NILL;
-
-    for (int i = 0; i < SIZE/2; i++) {
-        red_black_insert(i);
-        red_black_insert(SIZE-i);
-    }
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE/2; i++) {
-        tree_search(i);
-        tree_search(SIZE-i);
-    }
-
-    
-    KONIEC_TESTU
-
-    ///hash
-
-    INFO *info = (INFO*)malloc(sizeof(INFO));
-    info->size=13;
-    info->number_of_elements = 0;
-    create_new_table(info);
-    int old_size;
-
-
-    for (int i = 0; i < SIZE/2; i++)
-    {
-        insert_hash(i,info);
-        if ((double )(info->number_of_elements) / (info->size) > 1.5)
-        {
-            old_size = info->size;
-            info->size = nextPrime(info->size * 2);
-            resize(info, old_size);
-        }
-        insert_hash(SIZE-i,info);
-        if ((double )(info->number_of_elements) / (info->size) > 1.5)
-        {
-            old_size = info->size;
-            info->size = nextPrime(info->size * 2);
-            resize(info, old_size);
-        }
-    }
-   ZACIATOK_TESTU
-
-    for (int i = 0; i <SIZE/2 ; ++i)
-    {
-        search_hash(info,i);
-        search_hash(info,SIZE-i);
-    }
-
-    
-    KONIEC_TESTU
-
-    ///linear hash
-    hashArray = (struct DataItem**) malloc(SIZE_Hash *sizeof(struct DataItem*));
-    init();
-
-    for(int i = 0; i < SIZE/2; i++){
-        insert_Linear(i,1);
-        insert_Linear(SIZE-i,1);
-    }
-
-   ZACIATOK_TESTU
-    for(int i = 0; i < SIZE/2; i++){
-        search_hash_linear(i);
-        search_hash_linear(SIZE-i);
-    }
-
-    
-    
-    KONIEC_TESTU
-}
-
-void test3_a_insert_search()
-{
-    ///AVL
-    TREE *root = NULL;
-    LARGE_INTEGER frequency;
-    LARGE_INTEGER start;
-    LARGE_INTEGER end;
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE/2; i++) {
-        root = insert(i, root);
-        root = insert(SIZE-i,root);
-    }
-    for (int i = 0; i < SIZE/2; i++) {
-        search_AVL(i, root);
-        search_AVL(SIZE-i, root);
-    }
-
-    
-    KONIEC_TESTU
-
-
-    /////red-black
-    NILL = malloc(sizeof(struct node));
-    NILL->color = BLACK;
-    ROOT = NILL;
-
-   ZACIATOK_TESTU
-    for (int i = 0; i < SIZE/2; i++) {
-        red_black_insert(i);
-        red_black_insert(SIZE-i);
-    }
-    for (int i = 0; i < SIZE/2; i++) {
-        tree_search(i);
-        tree_search(SIZE-i);
-    }
-
-    
-    KONIEC_TESTU
-
-    ///hash
-
-    INFO *info = (INFO*)malloc(sizeof(INFO));
-    info->size=13;
-    info->number_of_elements = 0;
-    create_new_table(info);
-    int old_size;
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE/2; i++)
-    {
-        insert_hash(i,info);
-        if ((double )(info->number_of_elements) / (info->size) > 1.5)
-        {
-            old_size = info->size;
-            info->size = nextPrime(info->size * 2);
-            resize(info, old_size);
-        }
-        insert_hash(SIZE-i,info);
-        if ((double )(info->number_of_elements) / (info->size) > 1.5)
-        {
-            old_size = info->size;
-            info->size = nextPrime(info->size * 2);
-            resize(info, old_size);
-        }
-    }
-
-    for (int i = 0; i <SIZE/2 ; ++i)
-    {
-        search_hash(info,i);
-        search_hash(info,SIZE-i);
-    }
-
-
-    
-    KONIEC_TESTU
-
-
-    ///linear hash
-
-    hashArray = (struct DataItem**) malloc(SIZE_Hash *sizeof(struct DataItem*));
-    init();
-
-   ZACIATOK_TESTU
-
-    for(int i = 0; i < SIZE/2; i++){
-        insert_Linear(i,1);
-        insert_Linear(SIZE-i,1);
-    }
-    for(int i = 0; i < SIZE/2; i++){
-        search_hash_linear(i);
-        search_hash_linear(SIZE-i);
-    }
-
-    KONIEC_TESTU
-}
-
-void test1_random() {
-
-   int array2 = (int*)malloc(SIZE* sizeof(int));
-   int *array;
-   array = random_array(array2);
-
-
-    ///AVL
-    TREE *root = NULL;
-    LARGE_INTEGER frequency;
-    LARGE_INTEGER start;
-    LARGE_INTEGER end;
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE; i++) {
         root = insert(array[i], root);
     }
 
-    
-    deleteTree(&root);
-
     KONIEC_TESTU
+    deleteTree(&root);
+}
 
-    /////red-black
+void insert_RB(int *array)
+{
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
+
     NILL = malloc(sizeof(struct node));
     NILL->color = BLACK;
+
     ROOT = NILL;
 
-   ZACIATOK_TESTU
+    ZACIATOK_TESTU
 
     for (int i = 0; i < SIZE; i++) {
         red_black_insert(array[i]);
     }
 
     KONIEC_TESTU
+}
 
-    ///chain-hash
+void insert_test_chain_hash(int *array)
+{
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
 
-    INFO *info = (INFO *) malloc(sizeof(INFO));
-    info->size = 13;
+    INFO *info = (INFO*)malloc(sizeof(INFO));
+    info->size=13;
     info->number_of_elements = 0;
     create_new_table(info);
     int old_size;
 
-   ZACIATOK_TESTU
+    ZACIATOK_TESTU
 
-    for (int i = 0; i < SIZE; i++) {
-        insert_hash(array[i], info);
-        if ((double) (info->number_of_elements) / (info->size) > 1.5) {
+    for (int i = 0; i < SIZE; i++)
+    {
+        insert_hash(array[i],info);
+        if ((double )(info->number_of_elements) / (info->size) > 2.5)
+        {
             old_size = info->size;
             info->size = nextPrime(info->size * 2);
             resize(info, old_size);
         }
     }
 
-    
     KONIEC_TESTU
+    freeTable(&info);
 
 
-    ///linear hash
-
-    hashArray = (struct DataItem **) malloc(SIZE_Hash * sizeof(struct DataItem *));
-    init();
-
-   ZACIATOK_TESTU
-
-    for (int i = 0; i < SIZE; i++) {
-        insert_Linear(array[i], 1);
-    }
-
-    
-    
-    KONIEC_TESTU
 }
 
-void test2_random()
+void insert_test_linear_hash(int *array)
 {
-    int array2 = (int*)malloc(SIZE* sizeof(int));
-    int *array;
-    array = random_array(array2);
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
 
-    ///AVL
+    hashArray = (struct DataItem**) malloc(SIZE_Hash *sizeof(struct DataItem*));
+    init();
+
+    ZACIATOK_TESTU
+
+    for(int i = 0; i < SIZE; i++){
+        insert_Linear(array[i],1);
+    }
+
+    KONIEC_TESTU
+
+
+}
+
+void insert_test_BVS(int *array)
+{
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
+    TREE_BVS *root=NULL;
+
+    ZACIATOK_TESTU
+
+    for(int i=0 ;i<SIZE ;i++) {
+        root = insert_BVS(array[i], root);
+    }
+
+    KONIEC_TESTU
+    deleteTree_BVS(&root);
+
+}
+
+
+
+void test_search_AVL(int *array)
+{
     TREE *root = NULL;
     LARGE_INTEGER frequency;
     LARGE_INTEGER start;
     LARGE_INTEGER end;
 
-    for (int i = 0; i < SIZE; i++) {
+    for (int i = 0; i < SIZE; i++)
+    {
         root = insert(array[i], root);
     }
 
-   ZACIATOK_TESTU
+    ZACIATOK_TESTU
 
-    for (int i = 0; i < SIZE; i++) {
+    for (int i = 0; i < SIZE; i++)
+    {
         search_AVL(array[i],root);
     }
 
-    
-    deleteTree(&root);
     KONIEC_TESTU
+    deleteTree(&root);
+}
 
-
-    /////red-black
+void test_search_RB(int *array)
+{
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
     NILL = malloc(sizeof(struct node));
     NILL->color = BLACK;
+
     ROOT = NILL;
+
 
     for (int i = 0; i < SIZE; i++) {
         red_black_insert(array[i]);
     }
 
-   ZACIATOK_TESTU
+    ZACIATOK_TESTU
 
     for (int i = 0; i < SIZE; i++) {
         tree_search(array[i]);
     }
 
-    
     KONIEC_TESTU
 
-    ///chain-hash
+}
 
-    INFO *info = (INFO *) malloc(sizeof(INFO));
-    info->size = 13;
+void test_search_hash_chain(int *array)
+{
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
+
+
+    INFO *info = (INFO*)malloc(sizeof(INFO));
+    info->size=13;
     info->number_of_elements = 0;
     create_new_table(info);
     int old_size;
 
 
-    for (int i = 0; i < SIZE; i++) {
-        insert_hash(array[i], info);
-        if ((double) (info->number_of_elements) / (info->size) > 1.5) {
+    for (int i = 0; i < SIZE; i++)
+    {
+        insert_hash(array[i],info);
+        if ((double )(info->number_of_elements) / (info->size) > SIZE_FACTOR)
+        {
             old_size = info->size;
             info->size = nextPrime(info->size * 2);
             resize(info, old_size);
         }
     }
-   ZACIATOK_TESTU
+    ZACIATOK_TESTU
 
-    for(int i=0;i<SIZE;i++)
-    {
+    for (int i = 0; i < SIZE; i++) {
         search_hash(info,array[i]);
     }
 
-    
     KONIEC_TESTU
 
 
-    ///linear hash
+}
 
-    hashArray = (struct DataItem **) malloc(SIZE_Hash * sizeof(struct DataItem *));
+void test_search_hash_linear(int *array)
+{
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
+    struct DataItem *premena;
+
+    hashArray = (struct DataItem**) malloc(SIZE_Hash *sizeof(struct DataItem*));
     init();
 
-    for (int i = 0; i < SIZE; i++) {
-        insert_Linear(array[i], 1);
-    }
-   ZACIATOK_TESTU
+    for(int i = 0; i < SIZE; i++){
+        insert_Linear(array[i],1);
 
-    for (int i = 0; i < SIZE; i++) {
-        search_hash_linear(array[i]);
     }
 
-    
-    
+    ZACIATOK_TESTU
+
+    for(int i = 0; i < SIZE; i++){
+      search_hash_linear(array[i]);
+    }
+
     KONIEC_TESTU
 
 }
 
-void test3_random()
+void test_search_BVS(int *array)
 {
-    int array2 = (int*)malloc(SIZE* sizeof(int));
-    int *array;
-    array = random_array(array2);
 
-    ///AVL
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
+    TREE_BVS *root=NULL;
+
+    for(int i=0 ;i<SIZE ;i++) {
+        root = insert_BVS(array[i], root);
+    }
+
+    ZACIATOK_TESTU
+
+    for(int i=0 ;i<SIZE ;i++) {
+        search_BVS(array[i], root);
+    }
+
+    KONIEC_TESTU
+    deleteTree_BVS(&root);
+
+}
+
+
+
+
+void test_insert_search_AVL(int *array)
+{
     TREE *root = NULL;
     LARGE_INTEGER frequency;
     LARGE_INTEGER start;
     LARGE_INTEGER end;
 
-   ZACIATOK_TESTU
+    ZACIATOK_TESTU
 
-    for (int i = 0; i < SIZE; i++) {
+    for (int i = 0; i < SIZE; i++)
+    {
         root = insert(array[i], root);
-    }
-
-    for (int i = 0; i < SIZE; i++) {
         search_AVL(array[i],root);
     }
 
-    
-    deleteTree(&root);
+
     KONIEC_TESTU
+    deleteTree(&root);
 
 
-    /////red-black
+}
+
+void test_insert_search_RB(int *array)
+{
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
+
     NILL = malloc(sizeof(struct node));
     NILL->color = BLACK;
     ROOT = NILL;
 
-   ZACIATOK_TESTU
+    ZACIATOK_TESTU
 
     for (int i = 0; i < SIZE; i++) {
         red_black_insert(array[i]);
-    }
-
-    for (int i = 0; i < SIZE; i++) {
         tree_search(array[i]);
     }
 
-    
+
     KONIEC_TESTU
 
-    ///chain-hash
+}
 
-    INFO *info = (INFO *) malloc(sizeof(INFO));
-    info->size = 13;
+void test_insert_search_hash_chain(int *array)
+{
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
+
+    INFO *info = (INFO*)malloc(sizeof(INFO));
+    info->size=13;
     info->number_of_elements = 0;
     create_new_table(info);
     int old_size;
 
-   ZACIATOK_TESTU
+    ZACIATOK_TESTU
 
-    for (int i = 0; i < SIZE; i++) {
-        insert_hash(array[i], info);
-        if ((double) (info->number_of_elements) / (info->size) > 1.5) {
+    for (int i = 0; i < SIZE; i++)
+    {
+        insert_hash(array[i],info);
+        if ((double )(info->number_of_elements) / (info->size) > SIZE_FACTOR)
+        {
             old_size = info->size;
             info->size = nextPrime(info->size * 2);
             resize(info, old_size);
         }
-    }
-
-
-    for(int i=0;i<SIZE;i++)
-    {
         search_hash(info,array[i]);
     }
 
-    
+    freeTable(&info);
     KONIEC_TESTU
 
 
-    ///linear hash
 
-    hashArray = (struct DataItem **) malloc(SIZE_Hash * sizeof(struct DataItem *));
+}
+
+void test_insert_search_hash_linear(int *array)
+{
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
+
+    hashArray = (struct DataItem**) malloc(SIZE_Hash *sizeof(struct DataItem*));
     init();
 
-   ZACIATOK_TESTU
+    ZACIATOK_TESTU
 
-    for (int i = 0; i < SIZE; i++) {
-        insert_Linear(array[i], 1);
-    }
-    for (int i = 0; i < SIZE; i++) {
+    for(int i = 0; i < SIZE; i++){
+        insert_Linear(array[i],1);
         search_hash_linear(array[i]);
     }
 
-    
-    
     KONIEC_TESTU
 
+
 }
 
-
-void test_linear_small_to_big()
+void test_insert_search_BVS(int *array)
 {
-   // test1_insert();
-    //test2_search();
-    //test3_insert_search();
+
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER end;
+    TREE_BVS *root=NULL;
+
+    ZACIATOK_TESTU
+
+    for(int i=0 ;i<SIZE ;i++) {
+        root = insert_BVS(array[i], root);
+        search_BVS(array[i], root);
+    }
+
+    KONIEC_TESTU
+    deleteTree_BVS(&root);
+
 
 }
 
-void test_alternujuco()
+
+
+void test_insert(int *array)
 {
-    test1_insert_a();
-    // test2_a_search();
-    //test3_a_insert_search();
+
+    insert_test_BVS(array);
+    insert_test_AVL(array);
+    insert_RB(array);
+    insert_test_chain_hash(array);
+    insert_test_linear_hash(array);
+
+
 }
 
-void test_random()
+void test_search(int *array)
 {
-    test1_random();
-    //test2_random();
-    //test3_random();
+    test_search_BVS(array);
+    test_search_AVL(array);
+    test_search_RB(array);
+    test_search_hash_chain(array);
+    test_search_hash_linear(array);
 }
+
+void test_insert_search(int *array)
+{
+    test_insert_search_BVS(array);
+    test_insert_search_AVL(array);
+    test_insert_search_RB(array);
+    test_insert_search_hash_chain(array);
+    test_insert_search_hash_linear(array);
+
+}
+
+
+
+
+void test_linear(int n)
+{
+    int *array=NULL;
+    array = create_array_0_to_n(n);
+    //test_insert(array);
+    //test_search(array);
+    //test_insert_search(array);
+}
+
+void test_linear_nto0(int n)
+{
+    int *array=NULL;
+    array = create_array_n_to_0(n);
+    //test_insert(array);
+    //test_search(array);
+    //test_insert_search(array);
+}
+
+void test_alter(int n)
+{
+    int *array=NULL;
+    array = create_array_aleternujuco(n);
+    //test_insert(array);
+   // test_search(array);
+    //test_insert_search(array);
+}
+
+void test_random(int n)
+{
+    int *array=NULL;
+    array = random_array();
+    //test_insert(array);
+    test_search(array);
+    //test_insert_search(array);
+}
+
 
 
 
@@ -917,9 +522,12 @@ void test_random()
 
 int main() {
 
-    //test_linear_small_to_big();
-    //test_alternujuco();
-    // test_random();
+    int n=SIZE;
+    //test_linear(n);
+    //test_linear_nto0(n);
+    //test_alter(n);
+    test_random(n);
+
 
         return 0;
 

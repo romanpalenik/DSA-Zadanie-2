@@ -8,7 +8,6 @@ typedef struct Info{
     CELL **table;
     int size;
     int number_of_elements;
-
 }INFO;
 
 int hash(int number,int size);
